@@ -24,13 +24,14 @@ app.listen(3000, function () {
 ```
 This code creates a web server that listens on port 3000 and serves comments at the /comments endpoint. The comments are hard-coded in this example, but in a real application, you would fetch them from a database or another service. You can run this code by saving it to a file called comments.js and running node comments.js in your terminal. You should see the following output:
 ```
-Example app listening on port 3000!
+//Example app listening on port 3000!
 ```
 Now that you have a server running, you can use the fetch API to get the comments from the server and render them to the page.
 
 ### Fetching Data with AJAX
 The Fetch API is a modern interface that allows you to make HTTP requests to servers from web browsers. It is a replacement for the older XMLHttpRequest object. The Fetch API is built into the global window object, so you can access it from anywhere in your code. Here's an example of how you can use the Fetch API to get the comments from the server you created in the previous step:
-```javascript
+```
+// Path: index.html
 // Path: app.js
 // get comments
 fetch('http://localhost:3000/comments')
@@ -45,3 +46,4 @@ This code uses the fetch function to make a GET request to the server at http://
 
 ### Rendering Data with React
 Now that you have the comments from the server,
+```
