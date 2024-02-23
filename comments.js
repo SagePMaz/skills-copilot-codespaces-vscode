@@ -1,49 +1,62 @@
 // create web server
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static('public'));
+app.use(express.static('node_modules'));
 
-// allow CORS
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  next();
+// create connection to database
+var mysql = require('mysql');
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "root",
+  database: "comments"
 });
 
-// get comments
+// connect to database
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
+
+// create table in database
+con.query("CREATE TABLE IF NOT EXISTS comments (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), comment VARCHAR(255))", function (err, result) {
+  if (err) throw err;
+  console.log("Table created");
+});
+
+// get comments from database
 app.get('/comments', function (req, res) {
-  var comments = [
-    {name: 'John', content: 'This is a comment'},
-    {name: 'Bob', content: 'This is another comment'},
-  ];
-  res.send(comments);
+  con.query("SELECT * FROM comments", function (err, result, fields) {
+    if (err) throw err;
+    res.send(result);
+  });
 });
 
-// start web server
+// post comments to database
+app.post('/comments', function (req, res) {
+  var name = req.body.name;
+  var comment = req.body.comment;
+  con.query("INSERT INTO comments (name, comment) VALUES (?, ?)", [name, comment], function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+// delete comments from database
+app.delete('/comments/:id', function (req, res) {
+  var id = req.params.id;
+  con.query("DELETE FROM comments WHERE id = ?", [id], function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+// start listening on port 3000
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
 });
-```
-This code creates a web server that listens on port 3000 and serves comments at the /comments endpoint. The comments are hard-coded in this example, but in a real application, you would fetch them from a database or another service. You can run this code by saving it to a file called comments.js and running node comments.js in your terminal. You should see the following output:
-```
-//Example app listening on port 3000!
-```
-Now that you have a server running, you can use the fetch API to get the comments from the server and render them to the page.
-
-### Fetching Data with AJAX
-The Fetch API is a modern interface that allows you to make HTTP requests to servers from web browsers. It is a replacement for the older XMLHttpRequest object. The Fetch API is built into the global window object, so you can access it from anywhere in your code. Here's an example of how you can use the Fetch API to get the comments from the server you created in the previous step:
-```
-// Path: index.html
-// Path: app.js
-// get comments
-fetch('http://localhost:3000/comments')
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(comments) {
-    console.log(comments);
-  });
-```
-This code uses the fetch function to make a GET request to the server at http://localhost:3000/comments. It then uses the .then method to parse the response as JSON and log the comments to the console. You can run this code by saving it to a file called app.js and including it in your HTML file with a <script> tag. When you open your HTML file in a web browser, you should see the comments logged to the console.
-
-### Rendering Data with React
-Now that you have the comments from the server,
-```
+// Path: public/index.html
